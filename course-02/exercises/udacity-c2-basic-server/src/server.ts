@@ -2,6 +2,8 @@ import express, { Router, Request, Response } from 'express';
 import bodyParser from 'body-parser';
 
 import { Car, cars as cars_list } from './cars';
+import { connected } from 'process';
+
 
 (async () => {
   let cars:Car[]  = cars_list;
@@ -70,13 +72,48 @@ import { Car, cars as cars_list } from './cars';
 
   // @TODO Add an endpoint to GET a list of cars
   // it should be filterable by make with a query paramater
+  app.get('/cars', (req: Request, res: Response) =>{
+    let {make} = req.query;
+    if(make){
+      return res.status(200).send(cars.filter(car =>  car.make === make));
+    }
+    if(!make){
+      return res.status(200).send(cars);
+    }
+  })
 
   // @TODO Add an endpoint to get a specific car
   // it should require id
   // it should fail gracefully if no matching car is found
+  app.get('/cars/:id', (req:Request, res:Response) => {
+    let {id} = req.params;
+    if(!id){
+      return res.status(400).send('id is required')
+    }
+    const car = cars.find(car => car.id.toString() === id)
+
+    if(!car){
+      return res.status(404).send('car with specified id not found')
+    }
+    res.status(200).send(car)
+  })
 
   /// @TODO Add an endpoint to post a new car to our list
   // it should require id, type, model, and cost
+  app.post('/cars/', async (req: Request, res: Response) => {
+    let { make, type, model, cost, id } = req.body;
+    if (!id || !type || !model || !cost) {
+      // respond with an error if not
+      return res.status(400)
+                .send(`make, type, model, cost, id are required`);
+    }
+    const new_car: Car = {
+      make: make, type: type, model:model, cost:cost, id:id
+    };
+
+    cars.push(new_car);
+    res.status(201).send(new_car);
+  })
 
   // Start the Server
   app.listen( port, () => {
