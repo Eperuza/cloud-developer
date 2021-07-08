@@ -42,7 +42,7 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
     })
     .catch(err => {
       console.log(err)
-      return res.status(400).send('Error filtering at specified URL')
+      return res.status(424).send('Error filtering at specified URL')
     })
   })
   //! END @TODO1
